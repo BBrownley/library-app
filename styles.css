@@ -1,0 +1,75 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+button {
+    background-color: rgb(33,150,243);
+    border: 2px solid black;
+    border-radius: 2px;
+    cursor: pointer;
+    color: white;
+    margin: 20px 0;
+    padding: 10px;
+    font-size: 20px;
+}
+
+button:hover {
+    background-color: rgba(33, 149, 243, 0.8);
+}
+
+.container {
+    width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.books {
+    /*background-color: gray;*/
+}
+
+.card {
+    border: 1px solid black;
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.card .card__buttons {
+    margin-top: 20px;
+}
+
+.card .card__buttons button {
+    margin: 0;
+}
+
+.remove-book {
+    background-color: red;
+}
+
+
+
+.form {
+    display: none;
+    background-color: #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.form label {
+    width: 100px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.form input {
+    padding: 5px;
+}
+
+.form.open {
+    display: block;
+}
