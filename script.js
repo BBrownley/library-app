@@ -1,117 +1,148 @@
-let myLibrary = [
-    {
-        title: "The Angel of Terror",
-        author: "Edgar Wallace",
-        pages: 320,
-        hasBeenRead: false
-    },
-    {
-        title: "Engineering Bulletin No 1: Boiler and Furnace Testing",
-        author: "Rufus T. Strohm",
-        pages: 20,
-        hasBeenRead: false
+class Book {
+    constructor(title, author, pages, hasBeenRead) {
+        this.title = title;
+        this.author = author;
+        this.pages = pages;
+        this.hasBeenRead = hasBeenRead;
     }
-];
-
-const bookListElement = document.querySelector(".books");
-
-function Book(title, author, pages, hasBeenRead) {
-    this.author = author;
-    this.title = title;
-    this.pages = pages;
-    this.hasBeenRead = hasBeenRead;
 }
 
-function addBookToLibrary(userInput) {
-    const {author, title, pages, hasBeenRead} = userInput;
-    myLibrary.push(new Book(author, title, pages, hasBeenRead));
-}
+class Library {
 
-function render() {
+    constructor(books) {
+        this.books = books;
+    }
 
-    bookListElement.innerHTML = "";
+    addBook(bookProperties) {
+        const {title, author, pages} = bookProperties;
+        this.books.push(new Book(title, author, pages, false));
+    }
 
-    let id = 0;
+    render() {
+        const bookListElement = document.querySelector(".books");
+        bookListElement.innerHTML = "";
 
-    myLibrary.forEach((book, index) => {
+        let id = 0;
 
-        const card = document.createElement("div");
-        card.className = "card";
+        this.books.forEach(book => {
+            const card = document.createElement("div");
+            card.className = "card";
 
-        card.innerHTML = `
-            <p class="card__title">Title: <strong>${book.title}</strong></p>
-            <p class="card__author">Author: <strong>${book.author}</strong></p>
-            <p class="card__pages">Pages: <strong>${book.pages}</strong></p>
-            <p class="card__has-been-read">${book.hasBeenRead ? "Has been read" : "Not read"}</p>
-            <div class="card__buttons">
-                <button class="change-read-status">Change read status</button>
-                <button class="remove-book">Remove book</button>
-            </div>
-        `
+            card.innerHTML = `
+                <p class="card__title">Title: <strong>${book.title}</strong></p>
+                <p class="card__author">Author: <strong>${book.author}</strong></p>
+                <p class="card__pages">Pages: <strong>${book.pages}</strong></p>
+                <p class="card__has-been-read">${book.hasBeenRead ? "Has been read" : "Not read"}</p>
+                <div class="card__buttons">
+                    <button class="change-read-status">Change read status</button>
+                    <button class="remove-book">Remove book</button>
+                </div>
+            `
 
-        card.setAttribute("data-id", id.toString())
-        id++;
+            card.setAttribute("data-id", id.toString())
+            id++;
 
-        card.querySelector(".card__has-been-read").style.color = book.hasBeenRead ? "green" : "red";
+            card.querySelector(".card__has-been-read").style.color = (book.hasBeenRead) ? "green" : "red";
 
-        bookListElement.appendChild(card);
+            bookListElement.appendChild(card);
+        })
 
-    })
+        localStorage.setItem("myLibrary", JSON.stringify(this.books));
 
-    localStorage.setItem("myLibrary", JSON.stringify(myLibrary));
+    }
 
 }
 
-function formHandler(e) {
-    e.preventDefault();
+const MainController = (() => {
 
-    // Validate inputs
+    let myLibrary = [
+        {
+            title: "The Angel of Terror",
+            author: "Edgar Wallace",
+            pages: 320,
+            hasBeenRead: false
+        },
+        {
+            title: "Engineering Bulletin No 1: Boiler and Furnace Testing",
+            author: "Rufus T. Strohm",
+            pages: 20,
+            hasBeenRead: false
+        }
+    ];
 
-    const newBook = {hasBeenRead: false};
+    const library = new Library(myLibrary);
 
-    Array.from(e.target.elements).forEach(element => {
-        if (element.type === "text") {
-            newBook[element.id] = element.value;
+    const addBookButton = document.querySelector(".add-book");
+    const addBookForm = document.querySelector(".form");
+
+    const bookListElement = document.querySelector(".books");
+
+    const formHandler = e => {
+        e.preventDefault();
+    
+        const newBook = {hasBeenRead: false};
+    
+        Array.from(e.target.elements).forEach(element => {
+            if (element.type === "text") {
+                newBook[element.id] = element.value;
+            }
+        })
+    
+        library.addBook(newBook);
+        
+        MainController.toggleNewBookForm();
+        library.render();
+        
+    }
+
+    const toggleNewBookForm = () => {
+        addBookForm.classList.toggle("open");
+        if (addBookForm.classList.contains("open")) {
+            addBookButton.textContent = "Close form"
+            addBookButton.style.backgroundColor = "red"
+        } else {
+            addBookButton.textContent = "Add book"
+            addBookButton.style.backgroundColor = "rgb(33,150,243)"
+        }
+    }
+
+    bookListElement.addEventListener("click", (e) => {
+    
+        if (e.target.classList.contains("remove-book")) {
+            
+            const bookToDelete = e.path.find(element => element.classList.contains("card"))
+            library.books.splice(bookToDelete.getAttribute("data-id"), 1);
+            library.render();
+        } else if (e.target.classList.contains("change-read-status")) {
+            const bookToChangeReadStatus = e.path.find(element => element.classList.contains("card"))
+            
+            library.books[bookToChangeReadStatus.getAttribute("data-id")].hasBeenRead = !library.books[bookToChangeReadStatus.getAttribute("data-id")].hasBeenRead;
+    
+            library.render();
         }
     })
-    
-    addBookToLibrary(newBook);
-    console.log(newBook)
-    toggleNewBookForm();
-    render();
-    
-}
 
-const addBookButton = document.querySelector(".add-book");
-const addBookForm = document.querySelector(".form");
+    addBookButton.addEventListener("click", toggleNewBookForm);
 
-addBookButton.addEventListener("click", toggleNewBookForm);
+    window.addEventListener("load", () => {
 
-function toggleNewBookForm() {
-    console.log(addBookForm);
-    addBookForm.classList.toggle("open");
-    if (addBookForm.classList.contains("open")) {
-        addBookButton.textContent = "Close form"
-        addBookButton.style.backgroundColor = "red"
-    } else {
-        addBookButton.textContent = "Add book"
-        addBookButton.style.backgroundColor = "rgb(33,150,243)"
-    }
-}
+        let savedBooks = JSON.parse(localStorage.getItem("myLibrary"));
+        
+        savedBooks = savedBooks.map(savedBook => {
 
-bookListElement.addEventListener("click", (e) => {
-    if (e.target.classList.contains("remove-book")) {
-        const bookToDelete = e.path.find(element => element.classList.contains("card"))
-        myLibrary.splice(bookToDelete.getAttribute("data-id"), 1);
-        render();
-    } else if (e.target.classList.contains("change-read-status")) {
-        const bookToChangeReadStatus = e.path.find(element => element.classList.contains("card"))
-        myLibrary[bookToChangeReadStatus.getAttribute("data-id")].hasBeenRead ^= true;
-        render();
-    }
-})
+            let bookProperties = [];
 
-window.addEventListener("load", () => {
-    myLibrary = JSON.parse(localStorage.getItem("myLibrary"));
-    render();
-});
+            for (let key in savedBook) {
+                bookProperties.push(savedBook[key]);
+            }
+
+            return new Book(...bookProperties)
+        })
+
+        library.books = savedBooks;
+        library.render();
+    });
+
+    return {toggleNewBookForm, formHandler};
+
+})();
