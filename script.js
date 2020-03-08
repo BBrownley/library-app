@@ -136,6 +136,8 @@ const MainController = (() => {
 
     MainController.toggleNewBookForm();
     library.render();
+
+    e.target.reset();
   };
 
   const toggleNewBookForm = () => {
